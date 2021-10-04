@@ -1,2 +1,2 @@
-# udad-torchlightning
+# usad-torchlightning
 Implementation of USAD in PyTorch Lightning
