@@ -1,0 +1,7 @@
+name: usad
+
+conda_enc: conda.yaml
+
+entry_points:
+  main:
+    command: "python3 src/featurize.py"

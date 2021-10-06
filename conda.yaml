@@ -1,0 +1,17 @@
+name: usad-torchlightning
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  - numpy
+  - python=3.8.12
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - pytorch
+  - cudatoolkit=11.1
+  - pytorch-lightning
+  - mlflow
+prefix: /home/pk/miniconda3/envs/usad-torchlightning
