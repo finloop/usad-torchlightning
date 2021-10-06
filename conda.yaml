@@ -13,5 +13,5 @@ dependencies:
   - pytorch
   - cudatoolkit=11.1
   - pytorch-lightning
-  - mlflow
+  - dvc
 prefix: /home/pk/miniconda3/envs/usad-torchlightning

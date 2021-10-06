@@ -137,5 +137,5 @@ lightning_logs
 # pycharm
 .idea
 
-# datasets
-data
+# dvc
+.dvc
