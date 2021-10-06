@@ -127,3 +127,15 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# mlflow
+mlruns
+
+# pytorch -lightning
+lightning_logs
+
+# pycharm
+.idea
+
+# datasets
+data
