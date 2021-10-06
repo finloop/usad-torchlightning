@@ -1,80 +1,62 @@
 import os
-import tempfile
-import click
-
-import mlflow
-import mlflow.sklearn
+import sys
 
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+import yaml
 
-@click.command(help="Generate windowed features from dataset.")
-@click.option("--window-size", default=12, help="Set rolling window size")
-@click.option("--max-row-limit", default=10000)
-def featurize(window_size, max_row_limit):
-    with mlflow.start_run() as mlrun:
-        tmpdir = tempfile.mkdtemp()
 
-        test_file = os.path.join(tmpdir,"train.npz")
-        train_file = os.path.join(tmpdir,"test.npz")
+def create_windows(data: np.ndarray, window_size):
+    return data[np.arange(window_size) + np.arange(
+        data.shape[0] - window_size).reshape(-1, 1)]
 
-        normal_csv = "data/SWaT_Dataset_Normal_v1.csv"
-        attack_csv = "data/SWaT_Dataset_Attack_v0.csv"
 
-        #
-        # NORMAL DATA
-        #
-        normal = pd.read_csv(normal_csv, nrows=max_row_limit)
-        normal = normal.drop(["Timestamp", "Normal/Attack"], axis=1)
-        print(f"Loaded {len(normal)} train rows from {normal_csv}")
+def load_dataset(filename, nrows, sep, decimal):
+    df = pd.read_csv(filename, nrows=nrows, decimal=decimal, sep=sep, low_memory=False)
+    labels_ = np.array([float(label != 'Normal') for label in
+                        df["Normal/Attack"].values])
+    df = df.drop(["Timestamp", "Normal/Attack"], axis=1)
 
-        # Transform all columns into float64
-        for i in list(normal):
-            normal[i] = normal[i].apply(lambda x: str(x).replace(",", "."))
-        normal = normal.astype(float)
+    for i in list(df):
+        df[i] = df[i].apply(lambda x: str(x).replace(",", "."))
 
-        sc = preprocessing.StandardScaler()
-        x = normal.values
-        x_scaled = sc.fit_transform(x)
-        normal = pd.DataFrame(x_scaled)
-
-        windows_normal = normal.values[np.arange(window_size)[None, :] + np.arange(
-            normal.shape[0] - window_size)[:, None]]
-
-        print(f"Created train windows of shape {windows_normal.shape}")
-        print(f"Saving windows_normal to {train_file}")
-        np.savez_compressed(train_file, train=train_file)
-        mlflow.log_artifact(train_file, "train-file")
-        print(f"Saved {train_file}")
-
-        #
-        # ATTACK DATA
-        #
-        attack = pd.read_csv(attack_csv,
-                             sep=";", nrows=max_row_limit)
-        labels = [float(label != 'Normal') for label in
-                  attack["Normal/Attack"].values]
-        attack = attack.drop(["Timestamp", "Normal/Attack"], axis=1)
-        print(f"Loaded {len(attack)} test rows from {attack_csv}")
-
-        # Transform all columns into float64
-        for i in list(attack):
-            attack[i] = attack[i].apply(lambda x: str(x).replace(",", "."))
-        attack = attack.astype(float)
-
-        attack = pd.DataFrame(sc.transform(attack.values))
-
-        windows_attack = attack.values[np.arange(window_size)[None, :] + np.arange(
-            attack.shape[0] - window_size)[:, None]]
-
-        print(f"Created test windows of shape {windows_attack.shape}")
-
-        print(f"Saving windows_attack to {test_file}")
-        np.savez_compressed(test_file, test=test_file)
-        print(f"Saved {test_file}")
-        mlflow.log_artifact(test_file, "test-file")
+    return df.astype(float), labels_
 
 
 if __name__ == "__main__":
-    featurize()
+    # Read YAML params
+    params = yaml.safe_load(open('params.yaml'))['featurize']
+    max_row_limit = params["max_row_limit"]
+    window_size = params["window_size"]
+
+    # Read command line params
+    if len(sys.argv) != 3:
+        sys.stderr.write('Arguments error. Usage:\n')
+        sys.stderr.write(
+            '\tpython featurize.py data-dir-path features-dir-path\n'
+        )
+        sys.exit(1)
+
+    data_dir = sys.argv[1]
+    out_dir = sys.argv[2]
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    normal_csv = os.path.join(data_dir, "SWaT_Dataset_Normal_v1.csv")
+    attack_csv = os.path.join(data_dir, "SWaT_Dataset_Attack_v0.csv")
+
+    train_file = os.path.join(out_dir, "data.npz")
+
+    normal, _ = load_dataset(normal_csv, nrows=max_row_limit, sep=",", decimal=",")
+    attack, labels = load_dataset(attack_csv, nrows=max_row_limit, sep=";", decimal=";")
+
+    sc = preprocessing.StandardScaler()
+
+    normal = sc.fit_transform(normal.values)
+    attack = sc.transform(attack.values)
+
+    windows_normal = create_windows(normal, window_size)
+    windows_attack = create_windows(attack, window_size)
+
+    np.savez_compressed(train_file, train=windows_normal, test=windows_attack, labels=labels)
