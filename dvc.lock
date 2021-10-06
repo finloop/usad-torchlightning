@@ -1,0 +1,21 @@
+schema: '2.0'
+stages:
+  featurize:
+    cmd: python3 src/featurize.py data/raw data/featurize
+    deps:
+    - path: data/raw
+      md5: 9d3d74e16f896a88df4f97f9755bb4b0.dir
+      size: 305179520
+      nfiles: 5
+    - path: src/featurize.py
+      md5: 106da8c5d9611b0e868c110c11a30956
+      size: 1939
+    params:
+      params.yaml:
+        featurize.max_row_limit: 1000000
+        featurize.window_size: 12
+    outs:
+    - path: data/featurize
+      md5: a7b3aba8ca2b55549f9ef280169f3899.dir
+      size: 98596199
+      nfiles: 1

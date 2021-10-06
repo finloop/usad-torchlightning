@@ -1,0 +1,11 @@
+stages:
+  featurize:
+    cmd: python3 src/featurize.py data/raw data/featurize
+    deps:
+    - data/raw
+    - src/featurize.py
+    params:
+    - featurize.max_row_limit
+    - featurize.window_size
+    outs:
+    - data/featurize
