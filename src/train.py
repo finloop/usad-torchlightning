@@ -4,6 +4,7 @@ from model import USADModel
 from torch.utils.data import DataLoader, Dataset
 import sys
 import os
+import torch
 from pytorch_lightning import Trainer
 
 # Create Dataset
@@ -13,7 +14,7 @@ class NpzDataset(Dataset):
         self.data = np.load(path)[key]
 
     def __getitem__(self, index):
-        return self.data[index]
+        return torch.from_numpy(self.data[index]).float()
 
     def __len__(self):
         return len(self.data)
@@ -48,8 +49,9 @@ if __name__ == "__main__":
     test_loader = DataLoader(test, batch_size=BATCH_SIZE, num_workers=3)
     train_loader = DataLoader(train, batch_size=BATCH_SIZE, num_workers=3)
 
-    # FIX: calculating window_size and z_size
-    model = USADModel(window_size=WINDOW_SIZE, z_size=HIDDEN_SIZE)
+    NMETRICS = test[0].size()[0] // WINDOW_SIZE
+
+    model = USADModel(window_size=WINDOW_SIZE * NMETRICS, z_size=WINDOW_SIZE * HIDDEN_SIZE)
 
     trainer = Trainer(gpus=1, max_epochs=EPOCHS, )
 
@@ -57,4 +59,4 @@ if __name__ == "__main__":
 
     y_pred = trainer.predict(model, test_loader)
 
-    np.savez_compressed(os.path.join(predict_dir, "y_pred.npz"), y_pred=np.array(y_pred))
+    #np.savez_compressed(os.path.join(predict_dir, "y_pred.npz"), y_pred=y_pred)
