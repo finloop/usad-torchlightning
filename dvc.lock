@@ -19,3 +19,27 @@ stages:
       md5: 96dc364478248eea5f36cdb343cb0863.dir
       size: 83232709
       nfiles: 1
+  train:
+    cmd: python3 src/train.py data/featurize data/predictions
+    deps:
+    - path: data/featurize
+      md5: 96dc364478248eea5f36cdb343cb0863.dir
+      size: 83232709
+      nfiles: 1
+    - path: src/model.py
+      md5: 6afdee5b76a7f42677e260f6de406887
+      size: 3061
+    - path: src/train.py
+      md5: 273852ba717e2e41f68e541547b9b362
+      size: 1932
+    params:
+      params.yaml:
+        featurize.window_size: 8
+        train.batch_size: 7000
+        train.epochs: 1
+        train.hidden_size: 20
+    outs:
+    - path: data/predictions
+      md5: 3606026377588a900250c74deaf0b851.dir
+      size: 1402329
+      nfiles: 1

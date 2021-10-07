@@ -4,5 +4,5 @@ featurize:
 
 train:
   batch_size: 7000
-  epochs: 3
+  epochs: 1
   hidden_size: 20

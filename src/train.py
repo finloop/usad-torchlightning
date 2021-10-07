@@ -59,4 +59,7 @@ if __name__ == "__main__":
 
     y_pred = trainer.predict(model, test_loader)
 
-    #np.savez_compressed(os.path.join(predict_dir, "y_pred.npz"), y_pred=y_pred)
+    y_pred = np.concatenate([torch.stack(y_pred[:-1]).flatten().detach().cpu().numpy(),
+                             y_pred[-1].flatten().detach().cpu().numpy()])
+
+    np.savez_compressed(os.path.join(predict_dir, "y_pred.npz"), y_pred=y_pred)

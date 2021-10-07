@@ -9,3 +9,16 @@ stages:
     - featurize.window_size
     outs:
     - data/featurize
+  train:
+    cmd: python3 src/train.py data/featurize data/predictions
+    deps:
+    - data/featurize
+    - src/model.py
+    - src/train.py
+    params:
+    - featurize.window_size
+    - train.batch_size
+    - train.epochs
+    - train.hidden_size
+    outs:
+    - data/predictions
