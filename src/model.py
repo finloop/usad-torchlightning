@@ -56,7 +56,6 @@ class USADModel(LightningModule):
         self.learning_rate = learning_rate
 
     def forward(self, x, alpha=.5, beta=.5):
-        x = x[0]
         w1 = self.decoder_1(self.encoder(x))
         w2 = self.decoder_2(self.encoder(w1))
 
@@ -73,7 +72,6 @@ class USADModel(LightningModule):
 
     def training_step(self, train_batch, batch_idx, optimizer_idx):
         n = self.trainer.current_epoch + 1
-        train_batch = train_batch[0]
 
         z = self.encoder(train_batch)
         w1 = self.decoder_1(z)

@@ -56,7 +56,7 @@ if __name__ == "__main__":
     normal = sc.fit_transform(normal.values)
     attack = sc.transform(attack.values)
 
-    windows_normal = create_windows(normal, window_size)
-    windows_attack = create_windows(attack, window_size)
+    windows_normal = create_windows(normal, window_size).reshape(-1, normal.shape[1]*window_size)
+    windows_attack = create_windows(attack, window_size).reshape(-1, attack.shape[1]*window_size,)
 
     np.savez_compressed(train_file, train=windows_normal, test=windows_attack, labels=labels)

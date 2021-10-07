@@ -8,14 +8,14 @@ stages:
       size: 305179520
       nfiles: 5
     - path: src/featurize.py
-      md5: 106da8c5d9611b0e868c110c11a30956
-      size: 1939
+      md5: c94a3fff61a5c2f572b027ce9c6d07c0
+      size: 2022
     params:
       params.yaml:
         featurize.max_row_limit: 1000000
-        featurize.window_size: 12
+        featurize.window_size: 8
     outs:
     - path: data/featurize
-      md5: a7b3aba8ca2b55549f9ef280169f3899.dir
-      size: 98596199
+      md5: 96dc364478248eea5f36cdb343cb0863.dir
+      size: 83232709
       nfiles: 1
