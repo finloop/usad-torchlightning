@@ -3,6 +3,6 @@ featurize:
   window_size: 8
 
 train:
-  batch_size: 7000
-  epochs: 1
+  batch_size: 10000
+  epochs: 100
   hidden_size: 20
