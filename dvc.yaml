@@ -22,3 +22,14 @@ stages:
     - train.hidden_size
     outs:
     - data/predictions
+  validate:
+    cmd: python3 src/validate.py data/featurize data/predictions metrics.json
+    deps:
+    - data/featurize
+    - data/predictions
+    - src/validate.py
+    params:
+    - featurize.window_size
+    metrics:
+    - metrics.json:
+        cache: false
