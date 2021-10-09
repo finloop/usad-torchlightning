@@ -6,12 +6,12 @@ from collections import OrderedDict
 
 
 class Encoder(LightningModule):
-    def __init__(self, input_size, latent_size):
+    def __init__(self, input_size, latent_size, s1=2, s2=4):
         super().__init__()
 
-        self.layer_1 = nn.Linear(input_size, input_size // 2)
-        self.layer_2 = nn.Linear(input_size // 2, input_size // 4)
-        self.layer_3 = nn.Linear(input_size // 4, latent_size)
+        self.layer_1 = nn.Linear(input_size, input_size // s1)
+        self.layer_2 = nn.Linear(input_size // s1, input_size // s2)
+        self.layer_3 = nn.Linear(input_size // s2, latent_size)
 
         self.activation = nn.ReLU(True)
 
@@ -26,12 +26,12 @@ class Encoder(LightningModule):
 
 
 class Decoder(LightningModule):
-    def __init__(self, latent_size, output_size):
+    def __init__(self, latent_size, output_size, s1=2, s2=4):
         super().__init__()
 
-        self.layer_1 = nn.Linear(latent_size, output_size // 4)
-        self.layer_2 = nn.Linear(output_size // 4, output_size // 2)
-        self.layer_3 = nn.Linear(output_size // 2, output_size)
+        self.layer_1 = nn.Linear(latent_size, output_size // s2)
+        self.layer_2 = nn.Linear(output_size // s2, output_size // s1)
+        self.layer_3 = nn.Linear(output_size // s1, output_size)
 
         self.relu = nn.ReLU(True)
         self.sigmoid = nn.Sigmoid()
@@ -42,7 +42,7 @@ class Decoder(LightningModule):
         out = self.layer_2(out)
         out = self.relu(out)
         out = self.layer_3(out)
-        w = self.sigmoid(out)
+        w = self.relu(out)
         return w
 
 
@@ -91,3 +91,22 @@ class USADModel(LightningModule):
                     (1 - 1 / n) * torch.mean((train_batch - w22) ** 2)
             output = OrderedDict({"loss": loss2})
             return output
+
+    def validation_step(self, test_batch, batch_idx):
+        n = self.trainer.current_epoch + 1
+        z = self.encoder(test_batch)
+        w1 = self.decoder_1(z)
+
+        w22 = self.decoder_2(self.encoder(w1))
+
+        w2 = self.decoder_2(z)
+        loss2 = 1 / n * torch.mean((test_batch - w2) ** 2) - \
+                (1 - 1 / n) * torch.mean((test_batch - w22) ** 2)
+        output = OrderedDict({"val_loss": loss2})
+        return output
+
+    def validation_epoch_end(self, validation_step_outputs):
+        temp = []
+        for output in validation_step_outputs:
+            temp += [output["val_loss"].item()]
+        return {"val_loss": torch.mean(torch.tensor(temp))}
