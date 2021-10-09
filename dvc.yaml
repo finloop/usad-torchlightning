@@ -20,6 +20,8 @@ stages:
     - train.batch_size
     - train.epochs
     - train.hidden_size
+    - train.s1
+    - train.s2
     outs:
     - data/predictions
   validate:

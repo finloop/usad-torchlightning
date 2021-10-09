@@ -38,21 +38,21 @@ class Decoder(LightningModule):
 
     def forward(self, x):
         out = self.layer_1(x)
-        out = self.relu(out)
+        out = self.sigmoid(out)
         out = self.layer_2(out)
         out = self.relu(out)
         out = self.layer_3(out)
-        w = self.relu(out)
+        w = self.sigmoid(out)
         return w
 
 
 class USADModel(LightningModule):
-    def __init__(self, window_size, z_size, learning_rate=1e-3):
+    def __init__(self, window_size, z_size, learning_rate=1e-3, s1=2, s2=4):
         super().__init__()
 
-        self.encoder = Encoder(window_size, z_size)
-        self.decoder_1 = Decoder(z_size, window_size)
-        self.decoder_2 = Decoder(z_size, window_size)
+        self.encoder = Encoder(window_size, z_size, s1, s2)
+        self.decoder_1 = Decoder(z_size, window_size, s1, s2)
+        self.decoder_2 = Decoder(z_size, window_size, s1, s2)
         self.learning_rate = learning_rate
 
     def forward(self, x, alpha=.5, beta=.5):

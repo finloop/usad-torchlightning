@@ -6,6 +6,7 @@ import sys
 import os
 import torch
 from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 # Create Dataset
 class NpzDataset(Dataset):
@@ -28,6 +29,8 @@ if __name__ == "__main__":
     BATCH_SIZE = params['train']["batch_size"]
     EPOCHS = params['train']["epochs"]
     HIDDEN_SIZE = params['train']["hidden_size"]
+    S1 = int(params['train']["s1"])
+    S2 = int(params['train']["s2"])
 
     if len(sys.argv) != 3:
         sys.stderr.write('Arguments error. Usage:\n')
@@ -46,19 +49,25 @@ if __name__ == "__main__":
     test = NpzDataset(data_file, "test")
     train = NpzDataset(data_file, "train")
 
-    test_loader = DataLoader(test, batch_size=BATCH_SIZE, num_workers=3)
-    train_loader = DataLoader(train, batch_size=BATCH_SIZE, num_workers=3)
+    test_loader = DataLoader(test, batch_size=BATCH_SIZE, num_workers=5)
+    train_loader = DataLoader(train, batch_size=BATCH_SIZE, num_workers=5)
 
     NMETRICS = test[0].size()[0] // WINDOW_SIZE
 
-    model = USADModel(window_size=WINDOW_SIZE * NMETRICS, z_size=WINDOW_SIZE * HIDDEN_SIZE)
+    model = USADModel(window_size=WINDOW_SIZE * NMETRICS, z_size=WINDOW_SIZE * HIDDEN_SIZE, s1=S1, s2=S2)
 
-    trainer = Trainer(gpus=1, max_epochs=EPOCHS, )
+    checkpoint_callback = ModelCheckpoint(
+        monitor="loss",
+        dirpath=predict_dir,
+        filename="usad-{epoch:02d}-{loss:.2f}",
+        save_top_k=3,
+        mode="min",
+    )
 
-    trainer.fit(model, train_loader, train_loader)
+    trainer = Trainer(gpus=1, max_epochs=EPOCHS, callbacks=[checkpoint_callback])
+    trainer.fit(model, train_loader, test_loader)
 
     y_pred = trainer.predict(model, test_loader)
-
     y_pred = np.concatenate([torch.stack(y_pred[:-1]).flatten().detach().cpu().numpy(),
                              y_pred[-1].flatten().detach().cpu().numpy()])
 

@@ -27,21 +27,23 @@ stages:
       size: 83232709
       nfiles: 1
     - path: src/model.py
-      md5: 39e8ead6259cd85a65a3e9e73ce9b70f
-      size: 3742
+      md5: 0a0a875a220d1fd11ade13d1bd17a70a
+      size: 3813
     - path: src/train.py
-      md5: 974d89f91c2f614d382e671e72ab5292
-      size: 2185
+      md5: d68462cb39b33c5a710742d12dfe3b10
+      size: 2271
     params:
       params.yaml:
         featurize.window_size: 8
         train.batch_size: 10000
         train.epochs: 100
         train.hidden_size: 20
+        train.s1: 3
+        train.s2: 5
     outs:
     - path: data/predictions
-      md5: 7bde82a8b14a9e6d4a39021c3437d72b.dir
-      size: 1374793
+      md5: 24df9f6259f9948f37135d7c74ad46bf.dir
+      size: 1378437
       nfiles: 1
   validate:
     cmd: python3 src/validate.py data/featurize data/predictions metrics.json
@@ -51,8 +53,8 @@ stages:
       size: 83232709
       nfiles: 1
     - path: data/predictions
-      md5: 7bde82a8b14a9e6d4a39021c3437d72b.dir
-      size: 1374793
+      md5: 24df9f6259f9948f37135d7c74ad46bf.dir
+      size: 1378437
       nfiles: 1
     - path: src/validate.py
       md5: 313ee87dc6cd76edf73d77ea95526f44
@@ -62,5 +64,5 @@ stages:
         featurize.window_size: 8
     outs:
     - path: metrics.json
-      md5: f68b5abe81d2548d6d369a202a4a6815
+      md5: 03769f403f83e9a997f945b815d5224c
       size: 92
