@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+from sklearn.feature_selection import VarianceThreshold
 import yaml
 
 
@@ -51,12 +52,21 @@ if __name__ == "__main__":
     normal, _ = load_dataset(normal_csv, nrows=max_row_limit, sep=",", decimal=",")
     attack, labels = load_dataset(attack_csv, nrows=max_row_limit, sep=";", decimal=";")
 
+    vt = VarianceThreshold()
     sc = preprocessing.StandardScaler()
 
-    normal = sc.fit_transform(normal.values)
-    attack = sc.transform(attack.values)
+    normal = vt.fit_transform(normal)
+    attack = attack.loc[:, attack.columns[vt.get_support(indices=True)]].values
 
-    windows_normal = create_windows(normal, window_size).reshape(-1, normal.shape[1]*window_size)
-    windows_attack = create_windows(attack, window_size).reshape(-1, attack.shape[1]*window_size,)
+    normal = sc.fit_transform(normal)
+    attack = sc.transform(attack)
 
-    np.savez_compressed(train_file, train=windows_normal, test=windows_attack, labels=labels)
+    windows_normal = create_windows(normal, window_size).reshape(-1, window_size, normal.shape[1])
+    windows_attack = create_windows(attack, window_size).reshape(-1, window_size, attack.shape[1])
+    print("Normal shape: " + str(normal.shape))
+    print("Attack shape: " + str(attack.shape))
+
+    print("Windows normal shape" + str(windows_normal.shape))
+    print("Windows attack shape" + str(windows_attack.shape))
+
+    np.savez_compressed(train_file, train=normal, test=attack, labels=labels)
