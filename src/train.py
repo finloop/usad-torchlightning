@@ -1,3 +1,4 @@
+import mlflow
 import numpy as np
 import yaml
 from model import USADModel
@@ -5,7 +6,9 @@ from torch.utils.data import DataLoader, Dataset
 import sys
 import os
 import torch
+import mlflow
 from pytorch_lightning import Trainer
+from pytorch_lightning.loggers.mlflow import MLFlowLogger
 
 # Create Dataset
 class NpzDataset(Dataset):
@@ -49,17 +52,24 @@ if __name__ == "__main__":
     test_loader = DataLoader(test, batch_size=BATCH_SIZE, num_workers=3)
     train_loader = DataLoader(train, batch_size=BATCH_SIZE, num_workers=3)
 
-    NMETRICS = test[0].size()[0] // WINDOW_SIZE
+    print("Sample size: " + str(test[0].size()))
+    NMETRICS = test[0].size()[1]
 
-    model = USADModel(window_size=WINDOW_SIZE * NMETRICS, z_size=WINDOW_SIZE * HIDDEN_SIZE)
 
-    trainer = Trainer(gpus=1, max_epochs=EPOCHS, )
+
+    model = USADModel(seq_len=WINDOW_SIZE, n_features=NMETRICS, embedding_dim=50)
+
+    trainer = Trainer(gpus=1, max_epochs=EPOCHS)
 
     trainer.fit(model, train_loader, train_loader)
 
+    print("Predicting...")
     y_pred = trainer.predict(model, test_loader)
+    print(len(y_pred))
+    print(y_pred[0].size())
 
     y_pred = np.concatenate([torch.stack(y_pred[:-1]).flatten().detach().cpu().numpy(),
                              y_pred[-1].flatten().detach().cpu().numpy()])
 
     np.savez_compressed(os.path.join(predict_dir, "y_pred.npz"), y_pred=y_pred)
+    print("Predictions saved.")

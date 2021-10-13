@@ -57,3 +57,7 @@ if __name__ == "__main__":
     # save scores
     with open(metrics_file, 'w') as f:
         json.dump({'threshold': thresholdOpt, "acc": acc, "recall": recall, "f1": fscoreOpt}, f)
+
+    # save scores
+    with open("plots.json", 'w') as f:
+        json.dump({'thresholds': list(thresholds), "f1": list(fscore)}, f)

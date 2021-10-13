@@ -52,13 +52,20 @@ if __name__ == "__main__":
     normal, _ = load_dataset(normal_csv, nrows=max_row_limit, sep=",", decimal=",")
     attack, labels = load_dataset(attack_csv, nrows=max_row_limit, sep=";", decimal=";")
 
-    vt = VarianceThreshold()
+    #vt = VarianceThreshold()
     sc = preprocessing.StandardScaler()
 
-    normal = vt.fit_transform(normal)
-    attack = attack.loc[:, attack.columns[vt.get_support(indices=True)]].values
+    #normal = vt.fit_transform(normal)
+    #attack = attack.loc[:, attack.columns[vt.get_support(indices=True)]].values
+    normal = normal.values
+    attack = attack.values
 
+    n_diff = np.concatenate((np.zeros(normal.shape[1]).reshape((1,-1)), np.diff(normal, axis=0)))
+    normal = np.concatenate((normal, n_diff), axis=1)
     normal = sc.fit_transform(normal)
+
+    a_diff = np.concatenate((np.zeros(attack.shape[1]).reshape((1, -1)), np.diff(attack, axis=0)))
+    attack = np.concatenate((attack, a_diff), axis=1)
     attack = sc.transform(attack)
 
     windows_normal = create_windows(normal, window_size).reshape(-1, window_size, normal.shape[1])
@@ -69,4 +76,4 @@ if __name__ == "__main__":
     print("Windows normal shape" + str(windows_normal.shape))
     print("Windows attack shape" + str(windows_attack.shape))
 
-    np.savez_compressed(train_file, train=normal, test=attack, labels=labels)
+    np.savez_compressed(train_file, train=windows_normal, test=windows_attack, labels=labels)
