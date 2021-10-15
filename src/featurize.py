@@ -52,6 +52,9 @@ if __name__ == "__main__":
     normal, _ = load_dataset(normal_csv, nrows=max_row_limit, sep=",", decimal=",")
     attack, labels = load_dataset(attack_csv, nrows=max_row_limit, sep=";", decimal=";")
 
+    normal = normal.rolling(24).mean()
+    attack = attack.rolling(24).mean()
+
     #vt = VarianceThreshold()
     sc = preprocessing.StandardScaler()
 

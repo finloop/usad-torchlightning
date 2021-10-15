@@ -4,4 +4,4 @@ conda_enc: conda.yaml
 
 entry_points:
   main:
-    command: "python3 src/featurize.py"
+    command: "dvc exp run"

@@ -8,59 +8,59 @@ stages:
       size: 305179520
       nfiles: 5
     - path: src/featurize.py
-      md5: c94a3fff61a5c2f572b027ce9c6d07c0
-      size: 2022
+      md5: cf45a4dceb2bd3ab4fc22bc86d82e58a
+      size: 2876
     params:
       params.yaml:
         featurize.max_row_limit: 1000000
-        featurize.window_size: 8
+        featurize.window_size: 5
     outs:
     - path: data/featurize
-      md5: 96dc364478248eea5f36cdb343cb0863.dir
-      size: 83232709
+      md5: caed7910e33aea5aa75ab0e81563e876.dir
+      size: 274008822
       nfiles: 1
   train:
     cmd: python3 src/train.py data/featurize data/predictions
     deps:
     - path: data/featurize
-      md5: 96dc364478248eea5f36cdb343cb0863.dir
-      size: 83232709
+      md5: caed7910e33aea5aa75ab0e81563e876.dir
+      size: 274008822
       nfiles: 1
     - path: src/model.py
-      md5: 39e8ead6259cd85a65a3e9e73ce9b70f
-      size: 3742
+      md5: 8c817b34ef43ebf6511b7ff2cabe2aae
+      size: 4773
     - path: src/train.py
-      md5: 974d89f91c2f614d382e671e72ab5292
-      size: 2185
+      md5: 45c990b1b4abe525b08059a0a5149c00
+      size: 2128
     params:
       params.yaml:
-        featurize.window_size: 8
-        train.batch_size: 10000
-        train.epochs: 100
+        featurize.window_size: 5
+        train.batch_size: 5000
+        train.epochs: 10
         train.hidden_size: 20
     outs:
     - path: data/predictions
-      md5: 7bde82a8b14a9e6d4a39021c3437d72b.dir
-      size: 1374793
+      md5: 0affc6b1c6a05522b61dba6dbb02c6a3.dir
+      size: 1988
       nfiles: 1
   validate:
     cmd: python3 src/validate.py data/featurize data/predictions metrics.json
     deps:
     - path: data/featurize
-      md5: 96dc364478248eea5f36cdb343cb0863.dir
-      size: 83232709
+      md5: b31e5bcde535b630c04c5068e9c8fd0b.dir
+      size: 152170808
       nfiles: 1
     - path: data/predictions
-      md5: 7bde82a8b14a9e6d4a39021c3437d72b.dir
-      size: 1374793
+      md5: cdd57a18801af897e7f1eb93808107e4.dir
+      size: 1503218
       nfiles: 1
     - path: src/validate.py
-      md5: 313ee87dc6cd76edf73d77ea95526f44
-      size: 2147
+      md5: 52f864d28bba4c3a80b1dfc025826fa1
+      size: 2280
     params:
       params.yaml:
-        featurize.window_size: 8
+        featurize.window_size: 5
     outs:
     - path: metrics.json
-      md5: f68b5abe81d2548d6d369a202a4a6815
-      size: 92
+      md5: d03ea2d911d63aa7efc1f6cf155268f0
+      size: 74
